@@ -80,9 +80,8 @@ export default function LoginPage() {
       // Jika salah password atau ID tidak ditemukan
       setErrors({ employeeId: "ID Karyawan atau Password salah!" })
     } else {
-      // Jika sukses, paksa refresh agar proxy.ts membaca cookie baru, lalu masuk ke dashboard
-      router.refresh()
-      router.push("/dashboard")
+      // Hard redirect agar seluruh sistem me-refresh status auth-nya
+      window.location.href = "/dashboard"
     }
   }
 
