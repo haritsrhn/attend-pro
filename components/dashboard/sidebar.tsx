@@ -123,7 +123,6 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         </DropdownMenu>
       </div>
 
-      {/* FITUR YANG HILANG: Tombol Buka (Tampil saat Tertutup) */}
       {!isOpen && (
         <div className="border-t border-slate-800 p-3">
           <Button
@@ -132,7 +131,6 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             onClick={onToggle}
             className="w-full h-9 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center"
           >
-            {/* Ikon panah diputar 180 derajat agar menghadap ke kanan */}
             <ChevronLeft className="h-4 w-4 rotate-180" /> 
           </Button>
         </div>
