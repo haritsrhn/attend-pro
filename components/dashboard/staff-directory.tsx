@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react";
 import {
   Search,
   Plus,
@@ -14,20 +14,20 @@ import {
   ChevronRight,
   UserCheck,
   UserMinus,
-} from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Card, CardContent } from "@/components/ui/card"
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -35,22 +35,22 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { Label } from "@/components/ui/label"
-import { toast } from "@/hooks/use-toast"
+} from "@/components/ui/tooltip";
+import { Label } from "@/components/ui/label";
+import { toast } from "@/hooks/use-toast";
 
 const ENTITIES = [
   "All Entities",
   "Yayasan Alexandria Mahesa Raya",
   "CV Pesona Tiga Saudara",
   "PT Amanah Solusi Sejahtera",
-]
+];
 
 const SITES = [
   "All Sites",
@@ -62,7 +62,7 @@ const SITES = [
   "Sei Sikambing B",
   "Sunggal",
   "Hamparan Perak",
-]
+];
 
 const ENTITY_COLORS: Record<string, string> = {
   "Yayasan Alexandria Mahesa Raya":
@@ -71,13 +71,13 @@ const ENTITY_COLORS: Record<string, string> = {
     "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
   "PT Amanah Solusi Sejahtera":
     "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-}
+};
 
 const ENTITY_ABBR: Record<string, string> = {
   "Yayasan Alexandria Mahesa Raya": "YAMR",
   "CV Pesona Tiga Saudara": "CPTS",
   "PT Amanah Solusi Sejahtera": "PASS",
-}
+};
 
 const AVATAR_COLORS = [
   "bg-blue-500",
@@ -88,29 +88,33 @@ const AVATAR_COLORS = [
   "bg-teal-500",
   "bg-orange-500",
   "bg-cyan-500",
-]
+];
 
 type Employee = {
-  id: string
-  name: string
-  jobTitle: string
-  entity: string
-  site: string
-  email: string
-  phone: string
-  status: "active" | "inactive"
-  avatarColor: string
-}
+  id: string;
+  name: string;
+  jobTitle: string;
+  entity: string;
+  site: string;
+  email: string;
+  phone: string;
+  status: "active" | "inactive";
+  avatarColor: string;
+  rawEmployeeId: string;
+  rawRole: "ADMIN" | "STAFF";
+  rawCompanyId: string;
+  rawSiteId: string;
+};
 
-const EMPLOYEES: Employee[] = []
+const EMPLOYEES: Employee[] = [];
 
 const ENTITY_BY_NAME: Record<string, string> = {
   "Yayasan Alexandria Mahesa Raya": "Yayasan Alexandria Mahesa Raya",
   "CV Pesona Tiga Saudara": "CV Pesona Tiga Saudara",
   "PT Amanah Solusi Sejahtera": "PT Amanah Solusi Sejahtera",
-}
+};
 
-const ITEMS_PER_PAGE = 12
+const ITEMS_PER_PAGE = 12;
 
 function getInitials(name: string) {
   return name
@@ -118,7 +122,7 @@ function getInitials(name: string) {
     .slice(0, 2)
     .map((n) => n[0])
     .join("")
-    .toUpperCase()
+    .toUpperCase();
 }
 
 function EmployeeCard({
@@ -126,15 +130,15 @@ function EmployeeCard({
   onEdit,
   onToggleStatus,
 }: {
-  employee: Employee
-  onEdit: (emp: Employee) => void
-  onToggleStatus: (emp: Employee) => void
+  employee: Employee;
+  onEdit: (emp: Employee) => void;
+  onToggleStatus: (emp: Employee) => void;
 }) {
   return (
     <Card
       className={cn(
         "group relative border border-border/60 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30",
-        employee.status === "inactive" && "opacity-60"
+        employee.status === "inactive" && "opacity-60",
       )}
     >
       <CardContent className="p-5">
@@ -142,31 +146,53 @@ function EmployeeCard({
         <span
           className={cn(
             "absolute top-4 right-4 h-2.5 w-2.5 rounded-full ring-2 ring-background",
-            employee.status === "active" ? "bg-emerald-500" : "bg-slate-400"
+            employee.status === "active" ? "bg-emerald-500" : "bg-slate-400",
           )}
         />
 
         {/* Avatar + Name */}
         <div className="flex flex-col items-center text-center mb-4">
-          <Avatar className={cn("h-16 w-16 text-white text-lg font-semibold mb-3", employee.avatarColor)}>
-            <AvatarFallback className={cn("text-white font-semibold text-base", employee.avatarColor)}>
+          <Avatar
+            className={cn(
+              "h-16 w-16 text-white text-lg font-semibold mb-3",
+              employee.avatarColor,
+            )}
+          >
+            <AvatarFallback
+              className={cn(
+                "text-white font-semibold text-base",
+                employee.avatarColor,
+              )}
+            >
               {getInitials(employee.name)}
             </AvatarFallback>
           </Avatar>
-          <p className="font-semibold text-foreground text-sm leading-tight">{employee.name}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{employee.jobTitle}</p>
-          <p className="text-xs text-muted-foreground/70 font-mono mt-0.5">{employee.id}</p>
+          <p className="font-semibold text-foreground text-sm leading-tight">
+            {employee.name}
+          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {employee.jobTitle}
+          </p>
+          <p className="text-xs text-muted-foreground/70 font-mono mt-0.5">
+            {employee.id}
+          </p>
         </div>
 
         {/* Badges */}
         <div className="flex flex-wrap justify-center gap-1.5 mb-4">
           <Badge
             variant="secondary"
-            className={cn("text-xs font-medium px-2 py-0.5", ENTITY_COLORS[employee.entity])}
+            className={cn(
+              "text-xs font-medium px-2 py-0.5",
+              ENTITY_COLORS[employee.entity],
+            )}
           >
             {ENTITY_ABBR[employee.entity]}
           </Badge>
-          <Badge variant="secondary" className="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-0.5">
+          <Badge
+            variant="secondary"
+            className="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-0.5"
+          >
             <MapPin className="h-2.5 w-2.5 mr-1 inline-block" />
             {employee.site}
           </Badge>
@@ -210,50 +236,58 @@ function EmployeeCard({
                     "flex-1 h-8 text-xs gap-1.5 transition-colors",
                     employee.status === "active"
                       ? "hover:bg-destructive hover:text-destructive-foreground hover:border-destructive"
-                      : "hover:bg-emerald-500 hover:text-white hover:border-emerald-500"
+                      : "hover:bg-emerald-500 hover:text-white hover:border-emerald-500",
                   )}
                   onClick={() => onToggleStatus(employee)}
                 >
                   {employee.status === "active" ? (
-                    <><UserX className="h-3 w-3" />Deactivate</>
+                    <>
+                      <UserX className="h-3 w-3" />
+                      Deactivate
+                    </>
                   ) : (
-                    <><UserCheck className="h-3 w-3" />Activate</>
+                    <>
+                      <UserCheck className="h-3 w-3" />
+                      Activate
+                    </>
                   )}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                {employee.status === "active" ? "Deactivate Account" : "Activate Account"}
+                {employee.status === "active"
+                  ? "Deactivate Account"
+                  : "Activate Account"}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 export function StaffDirectory() {
-  const [employees, setEmployees] = useState<Employee[]>(EMPLOYEES)
-  const [search, setSearch] = useState("")
-  const [selectedEntity, setSelectedEntity] = useState("All Entities")
-  const [selectedSite, setSelectedSite] = useState("All Sites")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [confirmTarget, setConfirmTarget] = useState<Employee | null>(null)
-  const [editTarget, setEditTarget] = useState<Employee | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [employees, setEmployees] = useState<Employee[]>(EMPLOYEES);
+  const [search, setSearch] = useState("");
+  const [selectedEntity, setSelectedEntity] = useState("All Entities");
+  const [selectedSite, setSelectedSite] = useState("All Sites");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [confirmTarget, setConfirmTarget] = useState<Employee | null>(null);
+  const [editTarget, setEditTarget] = useState<Employee | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>(
     [],
-  )
+  );
   const [sites, setSites] = useState<
     { id: string; name: string; companyId: string }[]
-  >([])
+  >([]);
   const [formState, setFormState] = useState<{
-    name: string
-    employeeId: string
-    password: string
-    role: "ADMIN" | "STAFF"
-    companyId: string
-    siteId: string
+    name: string;
+    employeeId: string;
+    password: string;
+    role: "ADMIN" | "STAFF";
+    companyId: string;
+    siteId: string;
   }>({
     name: "",
     employeeId: "",
@@ -261,123 +295,148 @@ export function StaffDirectory() {
     role: "STAFF",
     companyId: "",
     siteId: "",
-  })
+  });
 
   const loadReferenceData = async () => {
     const [companiesRes, sitesRes] = await Promise.all([
       fetch("/api/companies").catch(() => null),
       fetch("/api/sites").catch(() => null),
-    ])
+    ]);
 
     if (companiesRes?.ok) {
-      const c = (await companiesRes.json()) as { id: string; name: string }[]
-      setCompanies(c)
+      const c = (await companiesRes.json()) as { id: string; name: string }[];
+      setCompanies(c);
     }
     if (sitesRes?.ok) {
       const s = (await sitesRes.json()) as {
-        id: string
-        name: string
-        companyId: string
-      }[]
-      setSites(s)
+        id: string;
+        name: string;
+        companyId: string;
+      }[];
+      setSites(s);
     }
-  }
+  };
 
   const loadEmployees = async () => {
     try {
-      const res = await fetch("/api/employees")
-      if (!res.ok) throw new Error()
-      const json = await res.json()
+      const res = await fetch("/api/employees");
+      if (!res.ok) throw new Error();
+      const json = await res.json();
       const mapped: Employee[] = (json as any[]).map((u, idx) => ({
         id: u.id,
         name: u.name,
         jobTitle: u.role === "ADMIN" ? "Administrator" : "Staff",
-        entity:
-          ENTITY_BY_NAME[u.company?.name] ?? "Yayasan Alexandria Mahesa Raya",
-        site: u.site?.name ?? "Unknown",
+        entity: u.company?.name ?? "Unknown Entity",
+        site: u.site?.name ?? "Unknown Site",
         email: `${u.employeeId}@example.com`,
-        phone: "",
+        phone: "-",
         status: u.isActive ? "active" : "inactive",
         avatarColor: AVATAR_COLORS[idx % AVATAR_COLORS.length],
-      }))
-      setEmployees(mapped)
+        rawEmployeeId: u.employeeId,
+        rawRole: u.role,
+        rawCompanyId: u.companyId,
+        rawSiteId: u.siteId,
+      }));
+      setEmployees(mapped);
     } catch {
       toast({
         title: "Failed to load employees",
         description: "Please refresh the page.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   useEffect(() => {
-    loadReferenceData()
-    loadEmployees()
-  }, [])
+    loadReferenceData();
+    loadEmployees();
+  }, []);
 
   const filtered = useMemo(() => {
     return employees.filter((emp) => {
       if (search) {
-        const q = search.toLowerCase()
-        if (!emp.name.toLowerCase().includes(q) && !emp.id.toLowerCase().includes(q)) return false
+        const q = search.toLowerCase();
+        if (
+          !emp.name.toLowerCase().includes(q) &&
+          !emp.id.toLowerCase().includes(q)
+        )
+          return false;
       }
-      if (selectedEntity !== "All Entities" && emp.entity !== selectedEntity) return false
-      if (selectedSite !== "All Sites" && emp.site !== selectedSite) return false
-      return true
-    })
-  }, [employees, search, selectedEntity, selectedSite])
+      if (selectedEntity !== "All Entities" && emp.entity !== selectedEntity)
+        return false;
+      if (selectedSite !== "All Sites" && emp.site !== selectedSite)
+        return false;
+      return true;
+    });
+  }, [employees, search, selectedEntity, selectedSite]);
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  )
+    currentPage * ITEMS_PER_PAGE,
+  );
 
-  const resetPage = () => setCurrentPage(1)
+  const resetPage = () => setCurrentPage(1);
+
+  const handleEditClick = (emp: Employee) => {
+    // 1. Isi form dengan data karyawan yang dipilih
+    setFormState({
+      name: emp.name,
+      employeeId: emp.rawEmployeeId,
+      password: "", // Dikosongkan agar password lama tidak tertimpa jika tidak diedit
+      role: emp.rawRole,
+      companyId: emp.rawCompanyId || "",
+      siteId: emp.rawSiteId || "",
+    });
+    // 2. Buka jendela dialog
+    setEditTarget(emp);
+  };
 
   const handleToggleStatus = (emp: Employee) => {
-    setConfirmTarget(emp)
-  }
+    setConfirmTarget(emp);
+  };
 
   const confirmToggle = () => {
-    if (!confirmTarget) return
-    const target = confirmTarget
-    const newStatus = target.status === "active" ? false : true
-    setIsSubmitting(true)
+    if (!confirmTarget) return;
+    const target = confirmTarget;
+    const newStatus = target.status === "active" ? false : true;
+    setIsSubmitting(true);
     fetch(`/api/employees/${target.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isActive: newStatus }),
     })
       .then((res) => {
-        if (!res.ok) throw new Error()
+        if (!res.ok) throw new Error();
         toast({
           title: newStatus ? "Employee reactivated" : "Employee deactivated",
-        })
-        return loadEmployees()
+        });
+        return loadEmployees();
       })
       .catch(() => {
         toast({
           title: "Update failed",
           description: "Could not update employee status.",
           variant: "destructive",
-        })
+        });
       })
       .finally(() => {
-        setIsSubmitting(false)
-        setConfirmTarget(null)
-      })
-  }
+        setIsSubmitting(false);
+        setConfirmTarget(null);
+      });
+  };
 
-  const activeCount = employees.filter((e) => e.status === "active").length
-  const inactiveCount = employees.filter((e) => e.status === "inactive").length
+  const activeCount = employees.filter((e) => e.status === "active").length;
+  const inactiveCount = employees.filter((e) => e.status === "inactive").length;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Staff Directory</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            Staff Directory
+          </h1>
           <p className="text-muted-foreground mt-1 text-sm">
             Manage employee profiles across all entities and sites
           </p>
@@ -405,8 +464,8 @@ export function StaffDirectory() {
               role: "STAFF",
               companyId: "",
               siteId: "",
-            })
-            setEditTarget({} as Employee)
+            });
+            setEditTarget({} as Employee);
           }}
         >
           <Plus className="h-4 w-4" />
@@ -424,49 +483,78 @@ export function StaffDirectory() {
               <Input
                 placeholder="Search by Employee Name or ID..."
                 value={search}
-                onChange={(e) => { setSearch(e.target.value); resetPage() }}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  resetPage();
+                }}
                 className="pl-9 bg-secondary/50 border-0"
               />
             </div>
 
             {/* Entity filter */}
-            <Select value={selectedEntity} onValueChange={(v) => { setSelectedEntity(v); resetPage() }}>
+            <Select
+              value={selectedEntity}
+              onValueChange={(v) => {
+                setSelectedEntity(v);
+                resetPage();
+              }}
+            >
               <SelectTrigger className="bg-secondary/50 border-0">
                 <Building2 className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
                 <SelectValue placeholder="Company Entity" />
               </SelectTrigger>
               <SelectContent>
                 {ENTITIES.map((e) => (
-                  <SelectItem key={e} value={e}>{e}</SelectItem>
+                  <SelectItem key={e} value={e}>
+                    {e}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
             {/* Site filter */}
-            <Select value={selectedSite} onValueChange={(v) => { setSelectedSite(v); resetPage() }}>
+            <Select
+              value={selectedSite}
+              onValueChange={(v) => {
+                setSelectedSite(v);
+                resetPage();
+              }}
+            >
               <SelectTrigger className="bg-secondary/50 border-0">
                 <MapPin className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
                 <SelectValue placeholder="Assigned Site" />
               </SelectTrigger>
               <SelectContent>
                 {SITES.map((s) => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
           {/* Results summary */}
-          {(search || selectedEntity !== "All Entities" || selectedSite !== "All Sites") && (
+          {(search ||
+            selectedEntity !== "All Entities" ||
+            selectedSite !== "All Sites") && (
             <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/60">
               <p className="text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">{filtered.length}</span> employees found
+                <span className="font-medium text-foreground">
+                  {filtered.length}
+                </span>{" "}
+                employees found
               </p>
               <Button
                 variant="ghost"
                 size="sm"
                 className="h-7 text-xs"
-                onClick={() => { setSearch(""); setSelectedEntity("All Entities"); setSelectedSite("All Sites"); resetPage() }}
+                onClick={() => {
+                  setSearch("");
+                  setSelectedEntity("All Entities");
+                  setSelectedSite("All Sites");
+                  resetPage();
+                }}
               >
                 Clear filters
               </Button>
@@ -482,7 +570,7 @@ export function StaffDirectory() {
             <EmployeeCard
               key={emp.id}
               employee={emp}
-              onEdit={setEditTarget}
+              onEdit={handleEditClick}
               onToggleStatus={handleToggleStatus}
             />
           ))}
@@ -494,12 +582,19 @@ export function StaffDirectory() {
               <UserMinus className="h-7 w-7 text-muted-foreground" />
             </div>
             <p className="font-medium text-foreground">No employees found</p>
-            <p className="text-sm text-muted-foreground mt-1">Try adjusting your search or filter criteria.</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Try adjusting your search or filter criteria.
+            </p>
             <Button
               variant="outline"
               size="sm"
               className="mt-4"
-              onClick={() => { setSearch(""); setSelectedEntity("All Entities"); setSelectedSite("All Sites"); resetPage() }}
+              onClick={() => {
+                setSearch("");
+                setSelectedEntity("All Entities");
+                setSelectedSite("All Sites");
+                resetPage();
+              }}
             >
               Clear all filters
             </Button>
@@ -519,7 +614,11 @@ export function StaffDirectory() {
             <span className="font-medium text-foreground">
               {Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)}
             </span>{" "}
-            of <span className="font-medium text-foreground">{filtered.length}</span> staff
+            of{" "}
+            <span className="font-medium text-foreground">
+              {filtered.length}
+            </span>{" "}
+            staff
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -533,11 +632,12 @@ export function StaffDirectory() {
             </Button>
             <div className="flex items-center gap-1">
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum: number
-                if (totalPages <= 5) pageNum = i + 1
-                else if (currentPage <= 3) pageNum = i + 1
-                else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i
-                else pageNum = currentPage - 2 + i
+                let pageNum: number;
+                if (totalPages <= 5) pageNum = i + 1;
+                else if (currentPage <= 3) pageNum = i + 1;
+                else if (currentPage >= totalPages - 2)
+                  pageNum = totalPages - 4 + i;
+                else pageNum = currentPage - 2 + i;
                 return (
                   <Button
                     key={pageNum}
@@ -548,7 +648,7 @@ export function StaffDirectory() {
                   >
                     {pageNum}
                   </Button>
-                )
+                );
               })}
             </div>
             <Button
@@ -565,11 +665,16 @@ export function StaffDirectory() {
       )}
 
       {/* Deactivate / Activate Confirmation Dialog */}
-      <Dialog open={!!confirmTarget} onOpenChange={(open) => !open && setConfirmTarget(null)}>
+      <Dialog
+        open={!!confirmTarget}
+        onOpenChange={(open) => !open && setConfirmTarget(null)}
+      >
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle>
-              {confirmTarget?.status === "active" ? "Deactivate Account" : "Activate Account"}
+              {confirmTarget?.status === "active"
+                ? "Deactivate Account"
+                : "Activate Account"}
             </DialogTitle>
             <DialogDescription>
               {confirmTarget?.status === "active"
@@ -582,8 +687,14 @@ export function StaffDirectory() {
               Cancel
             </Button>
             <Button
-              variant={confirmTarget?.status === "active" ? "destructive" : "default"}
-              className={confirmTarget?.status === "inactive" ? "bg-emerald-600 hover:bg-emerald-700" : ""}
+              variant={
+                confirmTarget?.status === "active" ? "destructive" : "default"
+              }
+              className={
+                confirmTarget?.status === "inactive"
+                  ? "bg-emerald-600 hover:bg-emerald-700"
+                  : ""
+              }
               onClick={confirmToggle}
               disabled={isSubmitting}
             >
@@ -594,7 +705,10 @@ export function StaffDirectory() {
       </Dialog>
 
       {/* Add / Edit Employee Dialog */}
-      <Dialog open={!!editTarget} onOpenChange={(open) => !open && setEditTarget(null)}>
+      <Dialog
+        open={!!editTarget}
+        onOpenChange={(open) => !open && setEditTarget(null)}
+      >
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle>
@@ -606,8 +720,8 @@ export function StaffDirectory() {
           <form
             className="space-y-4 mt-2"
             onSubmit={async (e) => {
-              e.preventDefault()
-              setIsSubmitting(true)
+              e.preventDefault();
+              setIsSubmitting(true);
               try {
                 const payload = {
                   name: formState.name,
@@ -616,9 +730,9 @@ export function StaffDirectory() {
                   role: formState.role,
                   companyId: formState.companyId,
                   siteId: formState.siteId,
-                }
+                };
 
-                const isEdit = !!(editTarget && editTarget.id)
+                const isEdit = !!(editTarget && editTarget.id);
 
                 const res = await fetch(
                   isEdit ? `/api/employees/${editTarget.id}` : "/api/employees",
@@ -637,9 +751,9 @@ export function StaffDirectory() {
                         : payload,
                     ),
                   },
-                )
+                );
 
-                const data = await res.json().catch(() => null)
+                const data = await res.json().catch(() => null);
 
                 if (!res.ok) {
                   toast({
@@ -648,25 +762,25 @@ export function StaffDirectory() {
                       (data as any)?.message ??
                       "Unable to save employee. Please try again.",
                     variant: "destructive",
-                  })
-                  return
+                  });
+                  return;
                 }
 
                 toast({
                   title: isEdit
                     ? "Employee updated successfully"
                     : "Employee created successfully",
-                })
-                await loadEmployees()
-                setEditTarget(null)
+                });
+                await loadEmployees();
+                setEditTarget(null);
               } catch {
                 toast({
                   title: "Save failed",
                   description: "Unexpected error. Please try again.",
                   variant: "destructive",
-                })
+                });
               } finally {
-                setIsSubmitting(false)
+                setIsSubmitting(false);
               }
             }}
           >
@@ -798,7 +912,7 @@ export function StaffDirectory() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
 
 // Needed for the placeholder dialog icon
@@ -819,5 +933,5 @@ function Users({ className }: { className?: string }) {
       <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
       <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
-  )
+  );
 }
