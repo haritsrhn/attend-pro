@@ -174,7 +174,7 @@ function EmployeeCard({
             {employee.jobTitle}
           </p>
           <p className="text-xs text-muted-foreground/70 font-mono mt-0.5">
-            {employee.id}
+            {employee.rawEmployeeId}
           </p>
         </div>
 
