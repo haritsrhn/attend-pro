@@ -7,30 +7,22 @@ import { Header } from "./header"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
-  activeSection: string
-  onSectionChange: (section: string) => void
 }
 
-export function DashboardLayout({
-  children,
-  activeSection,
-  onSectionChange,
-}: DashboardLayoutProps) {
+export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Sidebar - Hidden on mobile, shown on lg+ */}
+      {/* Sidebar - Sembunyi di HP, Tampil di Laptop */}
       <div className="hidden lg:block">
         <Sidebar
           isOpen={isSidebarOpen}
           onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-          activeSection={activeSection}
-          onSectionChange={onSectionChange}
         />
       </div>
 
-      {/* Mobile Sidebar Overlay */}
+      {/* Background Gelap saat Sidebar Terbuka di HP */}
       <div
         className={cn(
           "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm lg:hidden",
@@ -39,7 +31,7 @@ export function DashboardLayout({
         onClick={() => setIsSidebarOpen(false)}
       />
 
-      {/* Mobile Sidebar */}
+      {/* Sidebar Versi Mobile (HP) */}
       <div
         className={cn(
           "fixed inset-y-0 left-0 z-50 lg:hidden transition-transform duration-300",
@@ -49,23 +41,18 @@ export function DashboardLayout({
         <Sidebar
           isOpen={true}
           onToggle={() => setIsSidebarOpen(false)}
-          activeSection={activeSection}
-          onSectionChange={(section) => {
-            onSectionChange(section)
-            setIsSidebarOpen(false)
-          }}
         />
       </div>
 
-      {/* Main Content Area */}
+      {/* Area Konten Utama */}
       <div
         className={cn(
-          "transition-all duration-300",
+          "transition-all duration-300 flex flex-col min-h-screen",
           isSidebarOpen ? "lg:ml-64" : "lg:ml-20"
         )}
       >
         <Header onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
-        <main className="p-4 md:p-6">{children}</main>
+        <main className="p-4 md:p-6 bg-[#f8fafc] flex-1">{children}</main>
       </div>
     </div>
   )
