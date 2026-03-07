@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { signIn } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,6 +13,7 @@ import { Eye, EyeOff, LogIn, Clock, ShieldCheck, Building2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export default function LoginPage() {
+  const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [employeeId, setEmployeeId] = useState("")
   const [password, setPassword] = useState("")
@@ -53,19 +56,34 @@ export default function LoginPage() {
     return errs
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) {
       setErrors(errs)
       return
     }
+    
     setErrors({})
     setIsLoading(true)
-    setTimeout(() => {
-      setIsLoading(false)
-      window.location.href = "/"
-    }, 1800)
+
+    // MENGHUBUNGI DATABASE VIA NEXT-AUTH
+    const res = await signIn("credentials", {
+      employeeId: employeeId,
+      password: password,
+      redirect: false, // Kita atur redirect secara manual
+    })
+
+    setIsLoading(false)
+
+    if (res?.error) {
+      // Jika salah password atau ID tidak ditemukan
+      setErrors({ employeeId: "ID Karyawan atau Password salah!" })
+    } else {
+      // Jika sukses, paksa refresh agar proxy.ts membaca cookie baru, lalu masuk ke dashboard
+      router.refresh()
+      router.push("/dashboard")
+    }
   }
 
   return (
