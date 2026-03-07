@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//
+// Enums
+//
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+}
+
+enum LeaveType {
+  SICK
+  ANNUAL
+  UNPAID
+  DUTY
+}
+
+enum LeaveRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+//
+// Models
+//
+
+model Company {
+  id        String  @id @default(uuid()) @db.Uuid
+  name      String
+
+  users     User[]
+  sites     Site[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Site {
+  id        String  @id @default(uuid()) @db.Uuid
+  name      String
+
+  companyId String  @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id])
+
+  users     User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+}
+
+model User {
+  id           String  @id @default(uuid()) @db.Uuid
+  employeeId   String  @unique
+  name         String
+  passwordHash String
+  role         Role
+  isActive     Boolean @default(true)
+
+  companyId    String  @db.Uuid
+  siteId       String  @db.Uuid
+
+  company      Company @relation(fields: [companyId], references: [id])
+  site         Site    @relation(fields: [siteId], references: [id])
+
+  attendances   Attendance[]
+  leaveRequests LeaveRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([siteId])
+}
+
+model Attendance {
+  id               String            @id @default(uuid()) @db.Uuid
+  userId           String            @db.Uuid
+  user             User              @relation(fields: [userId], references: [id])
+
+  clockInTime      DateTime
+  clockOutTime     DateTime?
+  clockInLocation  String
+  clockOutLocation String?
+  status           AttendanceStatus
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, clockInTime])
+}
+
+model LeaveRequest {
+  id          String             @id @default(uuid()) @db.Uuid
+  userId      String             @db.Uuid
+  user        User               @relation(fields: [userId], references: [id])
+
+  leaveType   LeaveType
+  startDate   DateTime
+  endDate     DateTime
+  reason      String             @db.Text
+  documentUrl String?
+  status      LeaveRequestStatus
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, startDate])
+}

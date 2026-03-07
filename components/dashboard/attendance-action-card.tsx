@@ -1,0 +1,144 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { LogIn, LogOut, MapPin, CheckCircle2 } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+
+export function AttendanceActionCard() {
+  const [currentTime, setCurrentTime] = useState<Date | null>(null)
+  const [isClockedIn, setIsClockedIn] = useState(false)
+  const [clockInTime, setClockInTime] = useState<string | null>(null)
+
+  useEffect(() => {
+    setCurrentTime(new Date())
+    const timer = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const handleClockIn = () => {
+    setIsClockedIn(true)
+    const now = new Date()
+    setClockInTime(now.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }))
+  }
+
+  const handleClockOut = () => {
+    setIsClockedIn(false)
+    setClockInTime(null)
+  }
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    })
+  }
+
+  return (
+    <Card className="border-0 shadow-sm">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg font-semibold">Attendance Action</CardTitle>
+          <Badge
+            variant={isClockedIn ? "default" : "secondary"}
+            className={isClockedIn ? "bg-success text-success-foreground" : ""}
+          >
+            {isClockedIn ? (
+              <>
+                <CheckCircle2 className="mr-1 h-3 w-3" />
+                Clocked In
+              </>
+            ) : (
+              "Not Clocked In"
+            )}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Current Time Display */}
+        <div className="text-center py-4 bg-secondary/30 rounded-lg">
+          <p className="text-3xl font-bold text-foreground">
+            {currentTime ? formatTime(currentTime) : "--:--:--"}
+          </p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {currentTime ? currentTime.toLocaleDateString("en-US", {
+              weekday: "long",
+              month: "short",
+              day: "numeric",
+            }) : "Loading..."}
+          </p>
+        </div>
+
+        {/* Clock In/Out Status */}
+        {isClockedIn && clockInTime && (
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <span>Clocked in at</span>
+            <span className="font-medium text-foreground">{clockInTime}</span>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            size="lg"
+            onClick={handleClockIn}
+            disabled={isClockedIn}
+            className="h-14 bg-success hover:bg-success/90 text-success-foreground disabled:opacity-50"
+          >
+            <LogIn className="mr-2 h-5 w-5" />
+            Clock In
+          </Button>
+          <Button
+            size="lg"
+            onClick={handleClockOut}
+            disabled={!isClockedIn}
+            variant="destructive"
+            className="h-14 disabled:opacity-50"
+          >
+            <LogOut className="mr-2 h-5 w-5" />
+            Clock Out
+          </Button>
+        </div>
+
+        {/* Geolocation Map Placeholder */}
+        <div className="mt-4">
+          <div className="flex items-center gap-2 mb-2">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-foreground">Your Location</span>
+          </div>
+          <div className="relative h-32 bg-secondary/50 rounded-lg overflow-hidden">
+            {/* Map placeholder with grid pattern */}
+            <div className="absolute inset-0 opacity-30">
+              <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-muted-foreground" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+              </svg>
+            </div>
+            {/* Center marker */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-1">
+                <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  <div className="h-4 w-4 rounded-full bg-primary animate-pulse" />
+                </div>
+                <span className="text-xs text-muted-foreground bg-card/80 px-2 py-0.5 rounded">
+                  Kel. Limau Mungkur
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
