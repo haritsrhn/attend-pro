@@ -108,7 +108,7 @@ function haversineDistanceKm(a: Coordinates, b: Coordinates) {
 }
 
 export function MobileClock() {
-  const { data: session } = useSession()
+  const { data: session } = useSession() || {}  
   const userId = (session?.user as any)?.id as string | undefined
   const siteId = (session?.user as any)?.siteId as string | undefined
 
