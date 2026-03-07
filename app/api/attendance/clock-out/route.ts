@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { getToken } from 'next-auth/jwt';
 
 const prisma = new PrismaClient();
 
 const JAKARTA_TIMEZONE = 'Asia/Jakarta';
 const JAKARTA_OFFSET_MINUTES = 7 * 60; // UTC+7, no DST
-
-type ClockOutRequestBody = {
-  userId?: string;
-  clockOutLocation?: string;
-};
 
 function getJakartaDateParts(date: Date) {
   const formatter = new Intl.DateTimeFormat('en-US', {
@@ -58,20 +54,29 @@ function getJakartaDayBoundsUtc(date: Date) {
 
 async function handleClockOut(req: NextRequest) {
   try {
-    const body: ClockOutRequestBody = await req.json();
-    const { userId, clockOutLocation } = body;
+    const token = await getToken({ 
+      req, 
+      secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+      secureCookie: process.env.NODE_ENV === 'production'
+    });
 
-    if (!userId || !clockOutLocation) {
-      return NextResponse.json(
-        { message: 'userId and clockOutLocation are required' },
-        { status: 400 },
-      );
+    if (!token || !token.id) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
+
+    const userId = token.id as string;
+    
+    let body = {};
+    try {
+      body = await req.json();
+    } catch (e) {
+    }
+    
+    const clockOutLocation = (body as any).clockOutLocation || "Kel. Limau Mungkur";
 
     const now = new Date();
     const { start, end } = getJakartaDayBoundsUtc(now);
 
-    // Find today's attendance record for this user (WIB day)
     const attendance = await prisma.attendance.findFirst({
       where: {
         userId,
@@ -121,4 +126,3 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   return handleClockOut(req);
 }
-

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, AttendanceStatus } from '@prisma/client';
+import { getToken } from 'next-auth/jwt';
 
 const prisma = new PrismaClient();
 
@@ -71,36 +72,29 @@ function getAttendanceStatusForJakartaTime(date: Date): AttendanceStatus {
 
 export async function POST(req: NextRequest) {
   try {
-    const body: ClockInRequestBody = await req.json();
-    const { userId, location } = body;
+    const token = await getToken({ 
+      req, 
+      secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+      secureCookie: process.env.NODE_ENV === 'production'
+    });
 
-    if (!userId || !location) {
-      return NextResponse.json(
-        { message: 'userId and location are required' },
-        { status: 400 },
-      );
+    if (!token || !token.id) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    // Current moment (UTC instant), evaluation done in Asia/Jakarta
+    const userId = token.id as string;
+    const body = await req.json();
+    const location = body.location || "Kel. Limau Mungkur"; // Default location for a while
+
     const now = new Date();
     const { start, end } = getJakartaDayBoundsUtc(now);
 
-    // Check if user already clocked in today (WIB day)
     const existingAttendance = await prisma.attendance.findFirst({
-      where: {
-        userId,
-        clockInTime: {
-          gte: start,
-          lte: end,
-        },
-      },
+      where: { userId, clockInTime: { gte: start, lte: end } },
     });
 
     if (existingAttendance) {
-      return NextResponse.json(
-        { message: 'Already clocked in today' },
-        { status: 400 },
-      );
+      return NextResponse.json({ message: 'Already clocked in today' }, { status: 400 });
     }
 
     const status = getAttendanceStatusForJakartaTime(now);
@@ -117,10 +111,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(attendance, { status: 200 });
   } catch (error) {
     console.error('Clock-in error:', error);
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }
 

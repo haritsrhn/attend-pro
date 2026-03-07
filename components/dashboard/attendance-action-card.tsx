@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 export function AttendanceActionCard() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [isClockedIn, setIsClockedIn] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [clockInTime, setClockInTime] = useState<string | null>(null)
 
   useEffect(() => {
@@ -19,18 +20,56 @@ export function AttendanceActionCard() {
     return () => clearInterval(timer)
   }, [])
 
-  const handleClockIn = () => {
-    setIsClockedIn(true)
-    const now = new Date()
-    setClockInTime(now.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }))
+  const handleClockIn = async () => {
+    setIsLoading(true)
+    try {
+      const res = await fetch('/api/attendance/clock-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ location: 'Kel. Limau Mungkur' }) 
+      })
+      
+      if (res.ok) {
+        setIsClockedIn(true)
+        const now = new Date()
+        setClockInTime(now.toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }))
+        // Memaksa browser me-refresh data di tabel samping
+        window.location.reload(); 
+      } else {
+        alert("Gagal melakukan absen masuk atau Anda sudah absen hari ini.");
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleClockOut = () => {
-    setIsClockedIn(false)
-    setClockInTime(null)
+  const handleClockOut = async () => {
+    setIsLoading(true)
+    try {
+      const res = await fetch('/api/attendance/clock-out', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clockOutLocation: 'Kel. Limau Mungkur' }) 
+      })
+      
+      if (res.ok) {
+        setIsClockedIn(false)
+        setClockInTime(null)
+        // Memaksa browser me-refresh data di tabel samping
+        window.location.reload(); 
+      } else {
+        alert("Gagal melakukan absen pulang atau Anda belum absen masuk hari ini.");
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const formatTime = (date: Date) => {
@@ -89,7 +128,7 @@ export function AttendanceActionCard() {
           <Button
             size="lg"
             onClick={handleClockIn}
-            disabled={isClockedIn}
+            disabled={isLoading || isClockedIn}
             className="h-14 bg-success hover:bg-success/90 text-success-foreground disabled:opacity-50"
           >
             <LogIn className="mr-2 h-5 w-5" />
