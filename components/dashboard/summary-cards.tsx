@@ -9,7 +9,7 @@ export type SummaryCardData = {
   title: string
   value: string
   change?: string
-  icon: SummaryCardIcon
+  icon: React.ReactNode
   iconBg: string
   iconColor: string
 }
@@ -30,7 +30,7 @@ export function SummaryCards({ items }: SummaryCardsProps) {
                 {item.title}
               </CardTitle>
               <div className={`p-2 rounded-lg ${item.iconBg}`}>
-                <Icon className={`h-4 w-4 ${item.iconColor}`} />
+              {item.icon}
               </div>
             </CardHeader>
             <CardContent>
