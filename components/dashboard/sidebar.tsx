@@ -12,7 +12,7 @@ import {
   ChevronLeft,
   LogOut,
 } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -44,6 +44,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         isOpen ? "w-64" : "w-20"
       )}
     >
+      {/* Bagian Logo & Tombol Tutup (Tampil saat Terbuka) */}
       <div className="flex h-16 items-center justify-between border-b border-slate-800 px-4">
         <div className={cn("flex items-center gap-3", !isOpen && "justify-center w-full")}>
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600">
@@ -58,14 +59,15 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             variant="ghost"
             size="icon"
             onClick={onToggle}
-            className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800"
+            className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800 shrink-0"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
         )}
       </div>
 
-      <nav className="flex-1 space-y-1 p-3">
+      {/* Navigasi Menu */}
+      <nav className="flex-1 space-y-1 p-3 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
@@ -88,6 +90,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         })}
       </nav>
 
+      {/* Profil User */}
       <div className="border-t border-slate-800 p-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -103,8 +106,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                 </AvatarFallback>
               </Avatar>
               {isOpen && (
-                <div className="flex-1 text-left">
-                  <p className="font-medium text-white">Master Admin</p>
+                <div className="flex-1 text-left overflow-hidden">
+                  <p className="font-medium text-white truncate">Master Admin</p>
                 </div>
               )}
             </button>
@@ -119,6 +122,21 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* FITUR YANG HILANG: Tombol Buka (Tampil saat Tertutup) */}
+      {!isOpen && (
+        <div className="border-t border-slate-800 p-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggle}
+            className="w-full h-9 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center"
+          >
+            {/* Ikon panah diputar 180 derajat agar menghadap ke kanan */}
+            <ChevronLeft className="h-4 w-4 rotate-180" /> 
+          </Button>
+        </div>
+      )}
     </aside>
   )
 }
