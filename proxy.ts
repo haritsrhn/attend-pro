@@ -10,26 +10,35 @@ export default async function proxy(req: NextRequest) {
   const isProtected = PROTECTED_PREFIXES.some(prefix => path.startsWith(prefix));
   const isAdminRoute = ADMIN_ONLY_PREFIXES.some(prefix => path.startsWith(prefix));
 
-  // Cek apakah user sedang mencoba mengakses halaman yang dilindungi
-  if (isProtected) {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  // PERBAIKAN: Beri tahu middleware bahwa cookie di Vercel itu aman (Secure)
+  const isProduction = process.env.NODE_ENV === 'production';
+  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
 
-    // Jika belum login, lempar ke halaman login
+  if (isProtected) {
+    const token = await getToken({ 
+      req, 
+      secret: secret,
+      secureCookie: isProduction 
+    });
+
     if (!token) {
       const url = new URL('/login', req.url);
       return NextResponse.redirect(url);
     }
 
-    // Jika staf biasa mencoba masuk ke dashboard admin, kembalikan ke mobile-attendance
     if (isAdminRoute && token.role === 'STAFF') {
       const url = new URL('/mobile-attendance', req.url);
       return NextResponse.redirect(url);
     }
   }
 
-  // Jika user sudah login tapi mencoba mengakses halaman login lagi
   if (path === '/login') {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getToken({ 
+      req, 
+      secret: secret,
+      secureCookie: isProduction 
+    });
+    
     if (token) {
       const redirectPath = token.role === 'ADMIN' ? '/dashboard' : '/mobile-attendance';
       const url = new URL(redirectPath, req.url);
