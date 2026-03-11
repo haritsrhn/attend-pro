@@ -13,9 +13,10 @@ type PatchBody = {
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  props: { params: Promise<{ id: string }> },
 ) {
   try {
+    const params = await props.params;
     const userId = params.id
     const body: PatchBody = await req.json()
 
@@ -29,31 +30,21 @@ export async function PATCH(
 
     if (body.role !== undefined) {
       if (!Object.values(Role).includes(body.role as Role)) {
-        return NextResponse.json(
-          { message: "Invalid role value" },
-          { status: 400 },
-        )
+        return NextResponse.json({ message: "Invalid role value" }, { status: 400 })
       }
       updateData.role = body.role as Role
     }
 
     if (Object.keys(updateData).length === 0) {
-      return NextResponse.json(
-        { message: "No valid fields to update" },
-        { status: 400 },
-      )
+      return NextResponse.json({ message: "No valid fields to update" }, { status: 400 })
     }
 
-    // Ensure unique employeeId if changed
     if (updateData.employeeId) {
       const existing = await prisma.user.findUnique({
         where: { employeeId: updateData.employeeId },
       })
       if (existing && existing.id !== userId) {
-        return NextResponse.json(
-          { message: "Employee ID already exists" },
-          { status: 409 },
-        )
+        return NextResponse.json({ message: "Employee ID already exists" }, { status: 409 })
       }
     }
 
@@ -69,10 +60,6 @@ export async function PATCH(
     return NextResponse.json(updated, { status: 200 })
   } catch (error) {
     console.error("Employees PATCH error:", error)
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 },
-    )
+    return NextResponse.json({ message: "Internal server error" }, { status: 500 })
   }
 }
-

@@ -326,12 +326,14 @@ export function StaffDirectory() {
         id: u.id,
         name: u.name,
         jobTitle: u.role === "ADMIN" ? "Administrator" : "Staff",
-        entity: u.company?.name ?? "Unknown Entity",
-        site: u.site?.name ?? "Unknown Site",
+        entity:
+          ENTITY_BY_NAME[u.company?.name] ?? "Yayasan Alexandria Mahesa Raya",
+        site: u.site?.name ?? "Unknown",
         email: `${u.employeeId}@example.com`,
         phone: "-",
         status: u.isActive ? "active" : "inactive",
         avatarColor: AVATAR_COLORS[idx % AVATAR_COLORS.length],
+        // ✅ TAMBAHKAN 4 BARIS INI:
         rawEmployeeId: u.employeeId,
         rawRole: u.role,
         rawCompanyId: u.companyId,
@@ -379,16 +381,14 @@ export function StaffDirectory() {
   const resetPage = () => setCurrentPage(1);
 
   const handleEditClick = (emp: Employee) => {
-    // 1. Isi form dengan data karyawan yang dipilih
     setFormState({
       name: emp.name,
       employeeId: emp.rawEmployeeId,
-      password: "", // Dikosongkan agar password lama tidak tertimpa jika tidak diedit
+      password: "", // Kosongkan agar password tidak tertimpa jika tidak diubah
       role: emp.rawRole,
       companyId: emp.rawCompanyId || "",
       siteId: emp.rawSiteId || "",
     });
-    // 2. Buka jendela dialog
     setEditTarget(emp);
   };
 
